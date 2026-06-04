@@ -96,6 +96,13 @@
   .title h1{font-size:78px;max-width:14ch}
   .title .sub{font-size:27px;color:var(--muted);margin-top:22px;max-width:42ch;line-height:1.45}
   .meta-row{display:flex;gap:14px;margin-top:38px;flex-wrap:wrap}
+  /* cover slide: tighter rhythm so the byline clears the footer */
+  #cover{justify-content:flex-start;padding-top:56px}
+  #cover .logo{margin-bottom:18px}
+  #cover h1{font-size:58px;line-height:1.08;max-width:18ch}
+  #cover .sub{font-size:22px;margin-top:16px;max-width:46ch}
+  #cover .meta-row{margin-top:26px}
+  #cover .byline{margin-top:24px}
 
   /* flow diagram */
   .flow{width:100%;height:100%}
@@ -158,7 +165,7 @@
 <div class="deck" id="deck">
 
   <!-- 1 — TITLE -->
-  <section class="slide title">
+  <section class="slide title" id="cover">
     <div class="logo">
       <svg class="mark" viewBox="0 0 64 64" fill="none">
         <defs><linearGradient id="g1" x1="0" y1="0" x2="64" y2="64">
