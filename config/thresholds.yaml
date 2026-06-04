@@ -1,0 +1,33 @@
+# Global defaults applied to every service unless overridden
+defaults:
+  error_rate:
+    window_minutes: 5          # look-back window
+    max_error_pct: 5.0         # alert if >5% of logs are ERROR/FATAL
+    min_volume: 50             # ignore windows with fewer than N logs (noise guard)
+  latency:
+    window_minutes: 5
+    p99_ms_threshold: 2000     # alert if p99 latency > 2s (requires latency in log payload)
+  error_burst:
+    window_minutes: 1
+    max_errors: 100            # absolute error count spike
+  fatal:
+    window_minutes: 5
+    max_fatal: 1               # any FATAL is alert-worthy
+  silence:
+    expected_min_logs: 1       # alert if a normally-chatty service goes silent
+    window_minutes: 10
+  severity_weights:            # feeds scoring.ts
+    FATAL: 100
+    ERROR: 10
+    WARN: 2
+
+# Per-service overrides (optional). Keys are the Cloud Logging resource label.
+services:
+  payment-service:
+    error_rate:
+      max_error_pct: 1.0       # stricter for money paths
+    fatal:
+      max_fatal: 0
+  batch-report-service:
+    silence:
+      window_minutes: 360      # batch jobs are quiet by design

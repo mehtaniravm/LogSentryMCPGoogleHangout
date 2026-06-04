@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LogSentry — Leadership Briefing</title>
+<style>
+  :root{
+    --bg:#0a0e1a; --bg2:#0f1629; --panel:#131c33; --panel2:#1a2542;
+    --ink:#eaf0ff; --muted:#9fb0d4; --faint:#6b7ca6;
+    --cyan:#39d3ff; --emerald:#2ee6a6; --amber:#ffc14d; --red:#ff6b6b;
+    --violet:#9a86ff; --line:#243456;
+    --grad:linear-gradient(135deg,#39d3ff 0%,#2ee6a6 100%);
+    --grad-warm:linear-gradient(135deg,#ffc14d 0%,#ff6b6b 100%);
+    --slideW:1280px; --slideH:720px;
+    --font:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    --mono:'Cascadia Code','SF Mono',Consolas,'Roboto Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#05080f;color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
+  .deck{display:flex;flex-direction:column;align-items:center;gap:26px;padding:30px 0 80px}
+
+  .slide{
+    position:relative;width:var(--slideW);height:var(--slideH);
+    background:radial-gradient(1200px 700px at 80% -10%,rgba(57,211,255,.10),transparent 60%),
+               radial-gradient(900px 600px at 0% 110%,rgba(46,230,166,.10),transparent 55%),
+               linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%);
+    border:1px solid var(--line);border-radius:18px;overflow:hidden;
+    box-shadow:0 24px 70px rgba(0,0,0,.55);
+    padding:62px 70px;display:flex;flex-direction:column;
+  }
+  .slide::before{content:"";position:absolute;inset:0;background:
+    repeating-linear-gradient(90deg,transparent 0 39px,rgba(255,255,255,.012) 39px 40px),
+    repeating-linear-gradient(0deg,transparent 0 39px,rgba(255,255,255,.012) 39px 40px);
+    pointer-events:none}
+
+  /* header / footer chrome */
+  .kicker{display:flex;align-items:center;gap:12px;font-size:15px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--cyan);font-weight:700;margin-bottom:18px}
+  .kicker .dot{width:9px;height:9px;border-radius:50%;background:var(--grad);box-shadow:0 0 14px var(--cyan)}
+  h1{font-size:62px;line-height:1.04;font-weight:800;letter-spacing:-.02em}
+  h2{font-size:42px;line-height:1.08;font-weight:800;letter-spacing:-.015em;margin-bottom:8px}
+  h3{font-size:23px;font-weight:700;color:var(--ink)}
+  p,li{font-size:21px;line-height:1.5;color:var(--muted)}
+  .lead{font-size:25px;color:var(--ink);line-height:1.45}
+  .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .warm-text{background:var(--grad-warm);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .foot{position:absolute;left:70px;right:70px;bottom:26px;display:flex;justify-content:space-between;
+    align-items:center;font-size:13px;color:var(--faint);letter-spacing:.04em}
+  .foot .brand{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--muted)}
+  .pagenum{font-variant-numeric:tabular-nums}
+  .shield{width:20px;height:20px;flex:none}
+
+  .spacer{flex:1}
+  .cols{display:grid;gap:26px}
+  .c2{grid-template-columns:1fr 1fr}
+  .c3{grid-template-columns:1fr 1fr 1fr}
+  .c2-7-5{grid-template-columns:1.4fr 1fr}
+
+  .card{background:linear-gradient(160deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:14px;padding:24px 26px;position:relative;overflow:hidden}
+  .card .ic{font-size:30px;margin-bottom:10px;display:block}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:18px;line-height:1.45}
+  .card.accent{border-color:rgba(57,211,255,.35);box-shadow:inset 0 0 0 1px rgba(57,211,255,.06)}
+
+  ul.clean{list-style:none;display:flex;flex-direction:column;gap:16px;margin-top:6px}
+  ul.clean li{display:flex;gap:14px;align-items:flex-start;font-size:21px}
+  ul.clean li::before{content:"";width:11px;height:11px;border-radius:3px;background:var(--grad);
+    margin-top:8px;flex:none;box-shadow:0 0 10px rgba(46,230,166,.5)}
+  ul.warm li::before{background:var(--grad-warm)}
+
+  .stat{display:flex;flex-direction:column;gap:4px}
+  .stat .big{font-size:58px;font-weight:800;line-height:1;letter-spacing:-.02em}
+  .stat .lbl{font-size:16px;color:var(--muted);letter-spacing:.02em}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:999px;
+    background:rgba(57,211,255,.10);border:1px solid rgba(57,211,255,.3);color:var(--cyan);
+    font-size:15px;font-weight:600;letter-spacing:.03em}
+  .pill.em{background:rgba(46,230,166,.10);border-color:rgba(46,230,166,.3);color:var(--emerald)}
+  .pill.am{background:rgba(255,193,77,.10);border-color:rgba(255,193,77,.3);color:var(--amber)}
+
+  .tag{font-family:var(--mono);font-size:14px;color:var(--cyan);background:rgba(57,211,255,.08);
+    border:1px solid rgba(57,211,255,.22);padding:3px 9px;border-radius:7px}
+
+  code,.mono{font-family:var(--mono)}
+  .codebox{background:#070b16;border:1px solid var(--line);border-radius:12px;padding:18px 22px;
+    font-family:var(--mono);font-size:16px;line-height:1.6;color:#cfe;overflow:hidden}
+  .codebox .k{color:var(--violet)} .codebox .s{color:var(--emerald)} .codebox .c{color:var(--faint)}
+  .codebox .n{color:var(--amber)}
+
+  /* title slide */
+  .title{justify-content:center;align-items:flex-start}
+  .logo{display:flex;align-items:center;gap:18px;margin-bottom:30px}
+  .logo .mark{width:70px;height:70px}
+  .logo .name{font-size:30px;font-weight:800;letter-spacing:.02em}
+  .title h1{font-size:78px;max-width:14ch}
+  .title .sub{font-size:27px;color:var(--muted);margin-top:22px;max-width:42ch;line-height:1.45}
+  .meta-row{display:flex;gap:14px;margin-top:38px;flex-wrap:wrap}
+  /* cover slide: tighter rhythm so the byline clears the footer */
+  #cover{justify-content:flex-start;padding-top:56px}
+  #cover .logo{margin-bottom:18px}
+  #cover h1{font-size:58px;line-height:1.08;max-width:18ch}
+  #cover .sub{font-size:22px;margin-top:16px;max-width:46ch}
+  #cover .meta-row{margin-top:26px}
+  #cover .byline{margin-top:24px}
+
+  /* flow diagram */
+  .flow{width:100%;height:100%}
+  .timeline{display:flex;gap:0;margin-top:16px}
+  .step{flex:1;position:relative;padding:0 14px}
+  .step .num{width:38px;height:38px;border-radius:50%;background:var(--grad);color:#04263a;
+    font-weight:800;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+  .step h3{font-size:19px;margin-bottom:5px} .step p{font-size:16px}
+  .step:not(:last-child)::after{content:"";position:absolute;top:19px;left:52px;right:-4px;height:2px;
+    background:linear-gradient(90deg,var(--cyan),transparent)}
+
+  table.matrix{width:100%;border-collapse:collapse;margin-top:8px}
+  table.matrix th,table.matrix td{text-align:left;padding:13px 16px;font-size:18px;border-bottom:1px solid var(--line)}
+  table.matrix th{color:var(--cyan);font-size:14px;letter-spacing:.08em;text-transform:uppercase}
+  table.matrix td{color:var(--muted)} table.matrix td.t{color:var(--ink);font-weight:600}
+  table.matrix tr:last-child td{border-bottom:none}
+
+  .chatcard{background:#fff;border-radius:14px;overflow:hidden;color:#202124;font-size:15px;
+    box-shadow:0 14px 40px rgba(0,0,0,.45);max-width:430px}
+  .chatcard .hd{padding:14px 18px;color:#fff;display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+  .chatcard .hd.red{background:linear-gradient(135deg,#e8453c,#b71c1c)}
+  .chatcard .hd.green{background:linear-gradient(135deg,#1aa260,#0b8043)}
+  .chatcard .bd{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+  .chatcard .row{font-size:15px;color:#3c4043;line-height:1.4}
+  .chatcard .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#5f6368;font-weight:700}
+  .chatcard .btn{align-self:flex-start;background:#e8f0fe;color:#1967d2;border-radius:8px;padding:8px 14px;
+    font-weight:700;font-size:14px}
+  .chatcard .sample{font-family:var(--mono);font-size:13px;color:#5f6368;background:#f1f3f4;border-radius:6px;padding:6px 9px}
+
+  .big-quote{font-size:40px;line-height:1.25;font-weight:700;letter-spacing:-.01em;max-width:24ch}
+  .small{font-size:16px;color:var(--faint)}
+  .byline{display:flex;align-items:center;gap:14px;margin-top:30px}
+  .byline .bar{width:42px;height:3px;border-radius:3px;background:var(--grad)}
+  .byline .txt{font-size:19px;color:var(--muted)}
+  .byline .txt b{color:var(--ink);font-weight:800;letter-spacing:.01em}
+  .byline .txt .role{display:block;font-size:13.5px;color:var(--faint);letter-spacing:.16em;
+    text-transform:uppercase;margin-top:3px}
+  .foot .by{color:var(--faint)}
+
+  /* nav (screen only) */
+  .nav{position:fixed;right:18px;bottom:16px;display:flex;gap:8px;z-index:50;
+    background:rgba(10,14,26,.8);border:1px solid var(--line);border-radius:999px;padding:8px 12px;backdrop-filter:blur(8px)}
+  .nav button{background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;width:30px;height:30px;border-radius:50%}
+  .nav button:hover{background:var(--panel);color:var(--ink)}
+  .nav .pg{color:var(--faint);font-size:13px;align-self:center;min-width:54px;text-align:center;font-variant-numeric:tabular-nums}
+  .hint{position:fixed;left:18px;bottom:18px;color:var(--faint);font-size:13px;z-index:50}
+
+  @media print{
+    @page{size:1280px 720px;margin:0}
+    html,body{background:#05080f}
+    .deck{gap:0;padding:0}
+    .slide{border-radius:0;border:none;box-shadow:none;page-break-after:always;break-after:page;
+      width:1280px;height:720px}
+    .nav,.hint{display:none!important}
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 1 — TITLE -->
+  <section class="slide title" id="cover">
+    <div class="logo">
+      <svg class="mark" viewBox="0 0 64 64" fill="none">
+        <defs><linearGradient id="g1" x1="0" y1="0" x2="64" y2="64">
+          <stop offset="0" stop-color="#39d3ff"/><stop offset="1" stop-color="#2ee6a6"/></linearGradient></defs>
+        <path d="M32 3l24 9v16c0 15-10 27-24 33C18 55 8 43 8 28V12l24-9z" fill="url(#g1)" opacity=".18"/>
+        <path d="M32 3l24 9v16c0 15-10 27-24 33C18 55 8 43 8 28V12l24-9z" stroke="url(#g1)" stroke-width="2.4"/>
+        <circle cx="32" cy="27" r="9" stroke="url(#g1)" stroke-width="2.6"/>
+        <path d="M38.5 33.5L47 42" stroke="url(#g1)" stroke-width="2.8" stroke-linecap="round"/>
+        <path d="M22 27h6l2-5 4 10 2-5h6" stroke="#eaf0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="name">Log<span class="grad-text">Sentry</span></span>
+    </div>
+    <h1>AI that <span class="grad-text">watches every log</span>, so engineers don't have to.</h1>
+    <p class="sub">Proactive, AI-powered monitoring &amp; instant Q&amp;A across our fleet of 90+ microservices — built read-only, cost-aware, and customer-safe by design.</p>
+    <div class="meta-row">
+      <span class="pill">Senior Leadership Briefing</span>
+      <span class="pill em">Engineering &amp; Reliability</span>
+      <span class="pill am">Townhall Edition</span>
+    </div>
+    <div class="byline">
+      <span class="bar"></span>
+      <span class="txt">Architected, engineered &amp; battle-tested by <b>Nirav Mehta</b>
+        <span class="role">From blank repo to deploy-ready — design, build &amp; 80 passing tests</span></span>
+    </div>
+    <div class="foot">
+      <span class="brand"><svg class="shield" viewBox="0 0 24 24" fill="none"><path d="M12 2l8 3v6c0 5.5-3.5 9.5-8 11-4.5-1.5-8-5.5-8-11V5l8-3z" stroke="#2ee6a6" stroke-width="1.6"/></svg>LogSentry</span>
+      <span class="pagenum">01</span>
+    </div>
+  </section>
+
+  <!-- 2 — THE PROBLEM -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>The problem</div>
+    <h2>At 90+ services, logs outpace humans.</h2>
+    <p class="lead" style="max-width:46ch;margin-bottom:26px">We find out about incidents from <span class="warm-text">customers</span>, not dashboards. Engineers spend hours grepping logs across services to answer one question.</p>
+    <div class="cols c3">
+      <div class="card"><span class="ic">🔥</span><h3>Reactive firefighting</h3><p>Issues surface after customer impact. Mean-time-to-detect is measured in the wrong direction.</p></div>
+      <div class="card"><span class="ic">🧭</span><h3>Tribal knowledge</h3><p>"Is payment-service healthy?" takes a senior engineer, three consoles, and ten minutes.</p></div>
+      <div class="card"><span class="ic">💸</span><h3>Runaway log cost</h3><p>Storing and scanning everything at 90 services is expensive and only grows.</p></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="cols c3">
+      <div class="stat"><span class="big warm-text">90+</span><span class="lbl">Java microservices in scope</span></div>
+      <div class="stat"><span class="big warm-text">Hours</span><span class="lbl">Lost per incident to manual log triage</span></div>
+      <div class="stat"><span class="big warm-text">24×7</span><span class="lbl">Alert fatigue &amp; on-call toil</span></div>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">02</span></div>
+  </section>
+
+  <!-- 3 — THE VISION -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>The vision</div>
+    <h2>From <span class="warm-text">reactive</span> to <span class="grad-text">proactive</span> — with AI on watch.</h2>
+    <div class="cols c2" style="margin-top:24px;flex:1;align-items:center">
+      <div>
+        <ul class="clean">
+          <li><span><b style="color:var(--ink)">An AI agent inspects the fleet every few minutes</b> and raises a single, smart alert only when something genuinely breaches our thresholds.</span></li>
+          <li><span><b style="color:var(--ink)">Anyone can just ask, in Google Chat:</b> "Is checkout slow right now?" — and get an answer backed by real logs in seconds.</span></li>
+          <li><span><b style="color:var(--ink)">Tuning needs zero code changes</b> — sensitivity lives in a config file owned by the teams.</span></li>
+        </ul>
+      </div>
+      <div class="card accent">
+        <span class="ic">🛡️</span>
+        <h3 style="font-size:26px;margin-bottom:14px">The promise</h3>
+        <p style="font-size:21px;color:var(--ink);line-height:1.5">Catch problems <span class="grad-text">before customers do</span>, answer questions <span class="grad-text">in seconds</span>, and do it all <span class="grad-text">without touching production</span>.</p>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">03</span></div>
+  </section>
+
+  <!-- 4 — WHAT IT IS -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>What is LogSentry</div>
+    <h2>One system. Three capabilities.</h2>
+    <p class="lead" style="margin-bottom:24px;max-width:52ch">A thin, intelligent layer on top of the Google Cloud Logging we <i>already</i> have — no new agents on services, no production changes.</p>
+    <div class="cols c3" style="flex:1;align-items:stretch">
+      <div class="card accent"><span class="ic">🧰</span><h3>MCP Tool Server</h3><p>5 read-only tools that query logs, score health, and detect anomalies — the senses of the system.</p></div>
+      <div class="card accent"><span class="ic">🤖</span><h3>AI Monitoring Agent</h3><p>Claude reasons over the tools on a schedule and decides — alert, or stay quiet. No alert fatigue.</p></div>
+      <div class="card accent"><span class="ic">💬</span><h3>Google Chat Integration</h3><p>Pushes proactive alerts and answers support questions interactively, right where teams already work.</p></div>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">04</span></div>
+  </section>
+
+  <!-- 5 — OVERALL FLOW -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>How it works · overall flow</div>
+    <h2>From a log line to a decision — end to end.</h2>
+    <svg class="flow" viewBox="0 0 1140 360" style="margin-top:6px;max-height:430px">
+      <defs>
+        <linearGradient id="fg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#39d3ff"/><stop offset="1" stop-color="#2ee6a6"/></linearGradient>
+        <marker id="arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0 0l7 3-7 3z" fill="#39d3ff"/></marker>
+      </defs>
+      <!-- nodes -->
+      <g font-family="Segoe UI" font-size="15">
+        <!-- services -->
+        <rect x="10" y="120" width="150" height="120" rx="14" fill="#131c33" stroke="#243456"/>
+        <text x="85" y="150" fill="#eaf0ff" text-anchor="middle" font-weight="700">90+ Services</text>
+        <text x="85" y="174" fill="#9fb0d4" text-anchor="middle" font-size="13">Java · log4j</text>
+        <text x="85" y="206" fill="#6b7ca6" text-anchor="middle" font-size="12">already emit logs</text>
+
+        <!-- cloud logging -->
+        <rect x="200" y="120" width="160" height="120" rx="14" fill="#131c33" stroke="#243456"/>
+        <text x="280" y="150" fill="#eaf0ff" text-anchor="middle" font-weight="700">Cloud Logging</text>
+        <text x="280" y="174" fill="#9fb0d4" text-anchor="middle" font-size="13">+ BigQuery (WARN+)</text>
+        <text x="280" y="206" fill="#6b7ca6" text-anchor="middle" font-size="12">tiered for cost</text>
+
+        <!-- MCP tools -->
+        <rect x="400" y="95" width="170" height="170" rx="14" fill="#0f1629" stroke="#39d3ff" stroke-opacity=".5"/>
+        <text x="485" y="124" fill="#39d3ff" text-anchor="middle" font-weight="700">MCP Tools</text>
+        <text x="485" y="150" fill="#9fb0d4" text-anchor="middle" font-size="12.5">list_services</text>
+        <text x="485" y="170" fill="#9fb0d4" text-anchor="middle" font-size="12.5">query_logs</text>
+        <text x="485" y="190" fill="#9fb0d4" text-anchor="middle" font-size="12.5">get_service_health</text>
+        <text x="485" y="210" fill="#9fb0d4" text-anchor="middle" font-size="12.5">find_anomalies</text>
+        <text x="485" y="230" fill="#9fb0d4" text-anchor="middle" font-size="12.5">get_error_summary</text>
+
+        <!-- agent -->
+        <rect x="610" y="120" width="160" height="120" rx="14" fill="#0f1629" stroke="#2ee6a6" stroke-opacity=".5"/>
+        <text x="690" y="150" fill="#2ee6a6" text-anchor="middle" font-weight="700">AI Agent</text>
+        <text x="690" y="174" fill="#9fb0d4" text-anchor="middle" font-size="13">Claude reasons</text>
+        <text x="690" y="206" fill="#6b7ca6" text-anchor="middle" font-size="12">alert? · answer?</text>
+
+        <!-- thresholds (feeding agent) -->
+        <rect x="610" y="20" width="160" height="64" rx="12" fill="#131c33" stroke="#ffc14d" stroke-opacity=".45"/>
+        <text x="690" y="46" fill="#ffc14d" text-anchor="middle" font-weight="700" font-size="14">thresholds.yaml</text>
+        <text x="690" y="66" fill="#9fb0d4" text-anchor="middle" font-size="12">no-code tuning</text>
+
+        <!-- chat -->
+        <rect x="810" y="60" width="160" height="80" rx="14" fill="#131c33" stroke="#243456"/>
+        <text x="890" y="92" fill="#eaf0ff" text-anchor="middle" font-weight="700">Proactive Alert</text>
+        <text x="890" y="114" fill="#9fb0d4" text-anchor="middle" font-size="13">Google Chat card</text>
+
+        <rect x="810" y="220" width="160" height="80" rx="14" fill="#131c33" stroke="#243456"/>
+        <text x="890" y="252" fill="#eaf0ff" text-anchor="middle" font-weight="700">Q&amp;A Answer</text>
+        <text x="890" y="274" fill="#9fb0d4" text-anchor="middle" font-size="13">"is X healthy?"</text>
+
+        <!-- people -->
+        <rect x="1010" y="120" width="120" height="120" rx="14" fill="#0f1629" stroke="#9a86ff" stroke-opacity=".5"/>
+        <text x="1070" y="166" fill="#9a86ff" text-anchor="middle" font-weight="700">On-call</text>
+        <text x="1070" y="188" fill="#9fb0d4" text-anchor="middle" font-size="12">&amp; teams</text>
+      </g>
+      <!-- arrows -->
+      <g stroke="#39d3ff" stroke-width="2" fill="none" marker-end="url(#arr)" opacity=".85">
+        <path d="M160 180 H198"/>
+        <path d="M360 180 H398"/>
+        <path d="M570 180 H608"/>
+        <path d="M690 120 V86"/>
+        <path d="M770 165 C795 140 790 110 808 100"/>
+        <path d="M770 200 C795 230 790 255 808 260"/>
+        <path d="M970 100 C1000 120 1010 150 1010 165"/>
+        <path d="M970 260 C1000 240 1010 215 1010 195"/>
+      </g>
+      <!-- scheduler note -->
+      <g font-family="Segoe UI"><text x="690" y="300" fill="#6b7ca6" text-anchor="middle" font-size="13">⏱ Cloud Scheduler triggers a cycle every few minutes</text></g>
+    </svg>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">05</span></div>
+  </section>
+
+  <!-- 6 — THE 5 TOOLS -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>The senses · read-only tools</div>
+    <h2>Five tools. Zero ability to change anything.</h2>
+    <table class="matrix">
+      <tr><th>Tool</th><th>What it answers</th><th>Guardrail</th></tr>
+      <tr><td class="t mono">list_services</td><td>Which services are emitting logs right now?</td><td>read-only</td></tr>
+      <tr><td class="t mono">query_logs</td><td>Show me recent logs (service, severity, window, text)</td><td>capped ≤ 500 rows · ≤ 24h</td></tr>
+      <tr><td class="t mono">get_service_health</td><td>Error %, fatals, p99 latency, status for a service</td><td>derived, not stored</td></tr>
+      <tr><td class="t mono">find_anomalies</td><td>What's breaching thresholds across the fleet?</td><td>sorted by severity</td></tr>
+      <tr><td class="t mono">get_error_summary</td><td>Top error signatures, similar errors clustered</td><td>normalized grouping</td></tr>
+    </table>
+    <div class="spacer"></div>
+    <div class="cols c2">
+      <span class="pill">🔒 No mutation handlers anywhere</span>
+      <span class="pill em">✅ Same tools power both the agent and the chat bot</span>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">06</span></div>
+  </section>
+
+  <!-- 7 — THE AGENT LOOP -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>The brain · monitoring loop</div>
+    <h2>Smart enough to stay quiet.</h2>
+    <p class="lead" style="max-width:54ch;margin-bottom:20px">Every cycle, the agent investigates with the tools and returns a single, structured decision — engineered against alert fatigue.</p>
+    <div class="timeline">
+      <div class="step"><div class="num">1</div><h3>Load thresholds</h3><p>Per-service rules from config.</p></div>
+      <div class="step"><div class="num">2</div><h3>Investigate</h3><p>Calls tools across the fleet.</p></div>
+      <div class="step"><div class="num">3</div><h3>Decide</h3><p>JSON-only: alert or not, why.</p></div>
+      <div class="step"><div class="num">4</div><h3>Consolidate</h3><p>One alert, not a storm.</p></div>
+      <div class="step"><div class="num">5</div><h3>Respect cooldown</h3><p>No re-alerting the same issue.</p></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="codebox" style="max-width:760px">
+      <span class="c">// the agent must return only this — no guesswork, no invented numbers</span><br>
+      { <span class="k">"shouldAlert"</span>: <span class="n">true</span>, <span class="k">"anomalies"</span>: [ … ], <span class="k">"summary"</span>: <span class="s">"payment-service: 1 FATAL in last 5m"</span> }
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">07</span></div>
+  </section>
+
+  <!-- 8 — CHAT EXPERIENCE -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>Where teams meet it · Google Chat</div>
+    <h2>Alerts that explain themselves. Answers on demand.</h2>
+    <div class="cols c2" style="flex:1;align-items:center;margin-top:10px">
+      <div style="display:flex;justify-content:center">
+        <div class="chatcard">
+          <div class="hd red">🔴 LogSentry Alert — 1 anomaly</div>
+          <div class="bd">
+            <div><div class="lbl">payment-service · fatal</div><div class="row">1 FATAL log (&gt; threshold 0) — service may be degraded</div></div>
+            <div class="row" style="color:#202124"><b>Observed 1</b> vs <b>threshold 0</b> · severity 200</div>
+            <div class="sample">OutOfMemoryError: Java heap space</div>
+            <div class="btn">View in Cloud Logging →</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center">
+        <div class="chatcard">
+          <div class="hd green">💬 LogSentry</div>
+          <div class="bd">
+            <div><div class="lbl">Question</div><div class="row">is payment-service healthy?</div></div>
+            <div class="row" style="color:#202124">Yes — over the last 5 minutes: 0.4% error rate, p99 latency 180&nbsp;ms, no fatals. Status: <b>healthy</b>.</div>
+            <div class="row" style="font-size:13px;color:#5f6368">Sources: get_service_health, find_anomalies</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">08</span></div>
+  </section>
+
+  <!-- 9 — CONFIGURABLE -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>Owned by teams · no-code tuning</div>
+    <h2>Change sensitivity without shipping code.</h2>
+    <div class="cols c2-7-5" style="flex:1;align-items:center">
+      <div class="codebox" style="font-size:15.5px">
+        <span class="c"># config/thresholds.yaml</span><br>
+        <span class="k">defaults:</span><br>
+        &nbsp;&nbsp;<span class="k">error_rate:</span> { max_error_pct: <span class="n">5.0</span>, min_volume: <span class="n">50</span> }<br>
+        &nbsp;&nbsp;<span class="k">fatal:</span> { max_fatal: <span class="n">1</span> }<br>
+        &nbsp;&nbsp;<span class="k">latency:</span> { p99_ms_threshold: <span class="n">2000</span> }<br><br>
+        <span class="k">services:</span><br>
+        &nbsp;&nbsp;<span class="k">payment-service:</span> <span class="c"># stricter for money paths</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;error_rate: { max_error_pct: <span class="n">1.0</span> }<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;fatal: { max_fatal: <span class="n">0</span> }<br>
+        &nbsp;&nbsp;<span class="k">batch-report-service:</span> <span class="c"># quiet by design</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;silence: { window_minutes: <span class="n">360</span> }
+      </div>
+      <div>
+        <ul class="clean">
+          <li><span>Global defaults, with <b style="color:var(--ink)">field-level per-service overrides</b>.</span></li>
+          <li><span>Stricter rules for critical paths; looser for batch jobs.</span></li>
+          <li><span>Validated on load — a typo fails fast with a clear error.</span></li>
+          <li><span>Edit, redeploy, done. <b style="color:var(--ink)">No engineer required.</b></span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">09</span></div>
+  </section>
+
+  <!-- 10 — SAFETY -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>Customer safety first</div>
+    <h2>It <span class="grad-text">cannot</span> hurt production. By construction.</h2>
+    <div class="cols c2" style="flex:1;align-items:center">
+      <ul class="clean">
+        <li><span><b style="color:var(--ink)">Read-only everywhere.</b> No tool, query, or script can write to any production system.</span></li>
+        <li><span><b style="color:var(--ink)">Least-privilege identity.</b> The runtime account holds only three viewer roles — no editor, no owner.</span></li>
+        <li><span><b style="color:var(--ink)">Query caps.</b> Hard limits on rows and time windows bound both cost and blast radius.</span></li>
+        <li><span><b style="color:var(--ink)">SQL guard.</b> Any mutating keyword is rejected before a query runs.</span></li>
+      </ul>
+      <div class="card accent">
+        <h3 style="font-size:22px;margin-bottom:16px;color:var(--cyan)">Runtime permissions — the entire list</h3>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <span class="tag">roles/logging.viewer</span>
+          <span class="tag">roles/bigquery.dataViewer</span>
+          <span class="tag">roles/bigquery.jobUser</span>
+        </div>
+        <p style="margin-top:18px;font-size:18px">That's it. The agent <b style="color:var(--emerald)">literally cannot</b> change production.</p>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">10</span></div>
+  </section>
+
+  <!-- 11 — COST -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>Built to lower the bill</div>
+    <h2>The biggest cost lever, pulled by default.</h2>
+    <div class="cols c2-7-5" style="flex:1;align-items:center">
+      <div>
+        <ul class="clean">
+          <li><span><b style="color:var(--ink)">Log tiering.</b> Only <span class="tag">severity ≥ WARNING</span> is exported to BigQuery; high-volume INFO/DEBUG stay in the cheaper default bucket.</span></li>
+          <li><span><b style="color:var(--ink)">Query caps</b> bound every scan — no runaway BigQuery bills.</span></li>
+          <li><span><b style="color:var(--ink)">Scale-to-zero.</b> Cloud Run costs nothing when idle between cycles.</span></li>
+          <li><span><b style="color:var(--ink)">Alert dedup</b> stops alert storms that burn API calls and attention.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="font-size:20px;margin-bottom:14px;color:var(--amber)">Where the savings come from</h3>
+        <div class="stat" style="margin-bottom:18px"><span class="big" style="color:var(--emerald)">~80%</span><span class="lbl">of log volume is INFO/DEBUG — kept out of the expensive path<sup>*</sup></span></div>
+        <p class="small">*Typical fleet ratio; actuals depend on app verbosity. Sampling at the log4j appender can cut it further.</p>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">11</span></div>
+  </section>
+
+  <!-- 12 — ARCHITECTURE / STACK -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>Under the hood</div>
+    <h2>Serverless, standard, and boring — on purpose.</h2>
+    <div class="cols c3" style="flex:1;align-items:stretch">
+      <div class="card"><span class="ic">⚙️</span><h3>Runtime</h3><p>TypeScript on Node 20, deployed to <b style="color:var(--ink)">Cloud Run</b>. Cloud Scheduler is the heartbeat.</p></div>
+      <div class="card"><span class="ic">🔌</span><h3>Integration</h3><p>Official <b style="color:var(--ink)">MCP SDK</b>, Google Cloud Logging + BigQuery, Anthropic Claude, Google Chat.</p></div>
+      <div class="card"><span class="ic">🧱</span><h3>Design</h3><p>Every external call is behind an <b style="color:var(--ink)">injectable interface</b> — fully testable offline.</p></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="cols c3">
+      <span class="pill">No new agents on services</span>
+      <span class="pill em">Uses logging we already pay for</span>
+      <span class="pill am">Deploys via 5 idempotent scripts</span>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">12</span></div>
+  </section>
+
+  <!-- 13 — QUALITY -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>Engineering rigor</div>
+    <h2>Shipped with proof, not promises.</h2>
+    <div class="cols c3" style="margin-top:10px">
+      <div class="stat"><span class="big grad-text">80</span><span class="lbl">Automated tests, all passing</span></div>
+      <div class="stat"><span class="big grad-text">&gt;85%</span><span class="lbl">Coverage on core logic (100% on detection &amp; tools)</span></div>
+      <div class="stat"><span class="big grad-text">100%</span><span class="lbl">Offline — tests need zero cloud credentials</span></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="cols c2" style="align-items:center">
+      <ul class="clean">
+        <li><span>Built in <b style="color:var(--ink)">8 gated phases</b> — no phase advanced until its tests passed.</span></li>
+        <li><span>Unit + integration coverage of detectors, tools, MCP server, chat bot, and the agent cycle.</span></li>
+      </ul>
+      <div class="card accent">
+        <h3 style="font-size:20px;margin-bottom:10px;color:var(--cyan)">Verified behaviors</h3>
+        <p style="font-size:18px">Alert-once-then-cooldown · malformed AI output never crashes or false-alarms · invalid input returns a clean error · unauthorized chat calls rejected.</p>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">13</span></div>
+  </section>
+
+  <!-- 14 — ROLLOUT -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>The plan</div>
+    <h2>A safe, staged rollout.</h2>
+    <div class="timeline">
+      <div class="step"><div class="num">1</div><h3>Shadow</h3><p>Deploy read-only. Dry-run cycles — observe decisions, post nothing.</p></div>
+      <div class="step"><div class="num">2</div><h3>Pilot</h3><p>Enable alerts for 2–3 critical services in a non-prod Chat space.</p></div>
+      <div class="step"><div class="num">3</div><h3>Tune</h3><p>Teams calibrate thresholds. Measure signal-to-noise.</p></div>
+      <div class="step"><div class="num">4</div><h3>Fleet</h3><p>Roll to all 90+ services. Enable interactive Q&amp;A org-wide.</p></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="cols c3">
+      <div class="card"><h3 style="color:var(--cyan)">Low risk</h3><p>Read-only from day one. Worst case: it stays silent.</p></div>
+      <div class="card"><h3 style="color:var(--emerald)">Fast value</h3><p>Q&amp;A is useful on day one, before any tuning.</p></div>
+      <div class="card"><h3 style="color:var(--amber)">Reversible</h3><p>One config flag returns to dry-run instantly.</p></div>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">14</span></div>
+  </section>
+
+  <!-- 15 — IMPACT -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>Why it matters</div>
+    <h2>What changes for the business.</h2>
+    <div class="cols c2" style="flex:1;align-items:center">
+      <ul class="clean">
+        <li><span><b style="color:var(--ink)">Detect before customers do</b> — shift incidents left, protect revenue and trust.</span></li>
+        <li><span><b style="color:var(--ink)">Minutes, not hours</b> — anyone answers "is X healthy?" without a senior engineer.</span></li>
+        <li><span><b style="color:var(--ink)">Less on-call toil</b> — consolidated, deduped alerts mean fewer 3 a.m. pages.</span></li>
+        <li><span><b style="color:var(--ink)">Lower, predictable log spend</b> — tiering + caps bound the bill as we grow.</span></li>
+      </ul>
+      <div class="card accent">
+        <h3 style="font-size:22px;margin-bottom:16px">Targets to measure</h3>
+        <div class="stat" style="margin-bottom:14px"><span class="big grad-text">↓ MTTD</span><span class="lbl">Mean time to <i>detect</i> — the metric LogSentry moves first</span></div>
+        <div class="stat"><span class="big grad-text">↓ Toil</span><span class="lbl">Manual log-triage hours per incident</span></div>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">15</span></div>
+  </section>
+
+  <!-- 16 — CLOSING -->
+  <section class="slide title">
+    <div class="kicker"><span class="dot"></span>The ask</div>
+    <h1 class="big-quote">Greenlight the <span class="grad-text">shadow + pilot</span> rollout on our critical services.</h1>
+    <p class="sub" style="margin-top:24px">Low risk, read-only, reversible — and useful from day one. LogSentry is built, tested, and ready to deploy.</p>
+    <div class="meta-row">
+      <span class="pill">Built &amp; tested</span>
+      <span class="pill em">Read-only &amp; safe</span>
+      <span class="pill am">Ready to deploy</span>
+    </div>
+    <div class="spacer"></div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <svg class="mark" style="width:46px;height:46px" viewBox="0 0 64 64" fill="none">
+        <path d="M32 3l24 9v16c0 15-10 27-24 33C18 55 8 43 8 28V12l24-9z" fill="url(#g1)" opacity=".18"/>
+        <path d="M32 3l24 9v16c0 15-10 27-24 33C18 55 8 43 8 28V12l24-9z" stroke="url(#g1)" stroke-width="2.4"/>
+        <circle cx="32" cy="27" r="9" stroke="url(#g1)" stroke-width="2.6"/><path d="M38.5 33.5L47 42" stroke="url(#g1)" stroke-width="2.8" stroke-linecap="round"/>
+      </svg>
+      <div><div style="font-weight:800;font-size:22px">Log<span class="grad-text">Sentry</span></div><div class="small">Engineered by <b style="color:var(--muted)">Nirav Mehta</b> · Questions &amp; discussion</div></div>
+    </div>
+    <div class="foot"><span class="brand">LogSentry <span class="by">· Nirav Mehta</span></span><span class="pagenum">16</span></div>
+  </section>
+
+</div>
+
+<div class="hint">← → arrows to navigate · F for fullscreen · P to print / save as PDF</div>
+<div class="nav">
+  <button id="prev">‹</button><span class="pg" id="pg">1 / 16</span><button id="next">›</button>
+</div>
+<script>
+  const slides=[...document.querySelectorAll('.slide')];let i=0;
+  const pg=document.getElementById('pg');
+  function go(n){i=Math.max(0,Math.min(slides.length-1,n));slides[i].scrollIntoView({behavior:'smooth',block:'center'});pg.textContent=(i+1)+' / '+slides.length;}
+  document.getElementById('next').onclick=()=>go(i+1);
+  document.getElementById('prev').onclick=()=>go(i-1);
+  addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ')go(i+1);
+    else if(e.key==='ArrowLeft'||e.key==='PageUp')go(i-1);
+    else if(e.key.toLowerCase()==='f')document.documentElement.requestFullscreen?.();
+    else if(e.key.toLowerCase()==='p'){window.print();}
+  });
+  const io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){i=slides.indexOf(en.target);pg.textContent=(i+1)+' / '+slides.length;}})},{threshold:.6});
+  slides.forEach(s=>io.observe(s));
+</script>
+</body>
+</html>
